@@ -1,0 +1,53 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: ${LOG_MAX_SIZE:-10m}
+    max-file: ${LOG_MAX_FILE:-3}
+    compress: ${LOG_COMPRESS:-true}
+services:
+  rauthy:
+    image: ${IMAGE:-ghcr.io/sebadob/rauthy:0.36.2}
+    container_name: rauthy
+    logging: *default-logging
+    restart: unless-stopped
+    environment:
+      START_DELAY: ${START_DELAY:-10}
+    configs:
+      - source: rauthy-config
+        target: /app/config.toml
+    volumes:
+      - rauthy-data:/app/data
+    ports:
+      - "8443:8443"
+configs:
+  rauthy-config:
+    content: |
+      [cluster]
+      node_id = 1
+      secret_raft = "SuperSecureSecret1337"
+      secret_api = "SuperSecureSecret1337"
+
+      [email]
+      smtp_url = "localhost"
+      smtp_username = "username"
+      smtp_password = "password"
+      smtp_from = "Rauthy <rauthy@localhost>"
+
+      [encryption]
+      keys = ["q6u26/M0NFQzhSSldCY01rckJNa1JYZ3g2NUFtSnNOVGdoU0E="]
+      key_active = "q6u26"
+
+      [events]
+      email = "admin@localhost"
+
+      [server]
+      scheme = "http"
+      pub_url = "localhost:8080"
+      proxy_mode = false
+
+      [webauthn]
+      rp_id = "localhost"
+      rp_origin = "http://localhost:5173"
+volumes:
+  rauthy-data:
+    name: rauthy-data

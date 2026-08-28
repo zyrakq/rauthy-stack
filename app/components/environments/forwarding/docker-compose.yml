@@ -1,0 +1,4 @@
+services:
+  rauthy:
+    ports:
+      - "8443:8443"
